@@ -9,60 +9,37 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import DataTable from "../../ui/DataTable";
 import { connectSocket, offSocketEvent, onSocketEvent } from "../../../utils/socket";
-
-// --- Mock Data ---
-const MOCK_ORDERS = [
-  {
-    id: "ER84782",
-    date: "2 Oct 2024",
-    customer: {
-      name: "Leslie Alexander",
-      avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d"
-    },
-    items: 4,
-    total: 374,
-    paymentStatus: "Pending",
-  },
-  {
-    id: "ER84784",
-    date: "4 Oct 2024",
-    customer: {
-      name: "Robert Fox",
-      avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d"
-    },
-    items: 8,
-    total: 824,
-    paymentStatus: "Success",
-  }
-];
+import { useOrderList } from "../../../hooks/useOrders";
 
 export default function Order() {
   const [selectedIds, setSelectedIds] = useState([]);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+
+  const { data: orderData, isLoading } = useOrderList({ page, search });
+  const orders = orderData?.data || [];
+  const pagination = orderData?.pagination || {};
+
+  useEffect(() => {
+    connectSocket(import.meta.env.VITE_WEBSOCKET_URL);
+
+    const handler = () => {
+      console.log("message come from backend");
+      // queryClient.invalidateQueries(["orders"]) // Ideally we should use queryClient here if available in context or imported
+    };
+
+    onSocketEvent("order-event", handler);
+
+    return () => {
+      offSocketEvent("order-event", handler); // remove duplicate listener
+    };
+  }, []);
 
 
-useEffect(() => {
-  connectSocket(import.meta.env.VITE_WEBSOCKET_URL);
-
-  const handler = () => {
-    console.log("message come from backend");
-    fetchData();
-  };
-
-  onSocketEvent("order-event", handler);
-
-  return () => {
-    offSocketEvent("order-event", handler); // remove duplicate listener
-  };
-}, []);
-
-
-  const fetchData=()=>{
-    console.log("fetch data single order")
-  }
   // Handlers
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedIds(MOCK_ORDERS.map(o => o.id));
+      setSelectedIds(orders.map(o => o.order_id));
     } else {
       setSelectedIds([]);
     }
@@ -74,7 +51,7 @@ useEffect(() => {
     );
   };
 
-  const isAllSelected = MOCK_ORDERS.length > 0 && selectedIds.length === MOCK_ORDERS.length;
+  const isAllSelected = orders.length > 0 && selectedIds.length === orders.length;
 
   // Columns
   const columns = [
@@ -95,57 +72,66 @@ useEffect(() => {
           <input
             type="checkbox"
             className="w-4 h-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 cursor-pointer"
-            checked={selectedIds.includes(row.id)}
-            onChange={() => handleSelectOne(row.id)}
+            checked={selectedIds.includes(row.order_id)}
+            onChange={() => handleSelectOne(row.order_id)}
           />
         </div>
       )
     },
     {
       header: "Orders",
-      render: (row) => <span className="font-medium text-slate-900">#{row.id}</span>
+      render: (row) => <span className="font-medium text-slate-900">#{row.order_id}</span>
     },
     {
       header: "Date",
-      accessor: "date",
+      accessor: "order_date",
       className: "text-slate-500"
     },
     {
       header: "Customer",
       render: (row) => (
         <div className="flex items-center gap-3">
-          <img
-            src={row.customer.avatar}
-            alt={row.customer.name}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-          <span className="font-medium text-slate-700">{row.customer.name}</span>
+          <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-medium text-xs">
+            {row.customer_name?.substring(0, 2).toUpperCase()}
+          </div>
+          <span className="font-medium text-slate-700">{row.customer_name}</span>
         </div>
       )
     },
     {
-      header: "Delivery",
-      render: () => <span className="text-slate-500">N/A</span>
+      header: "Status", // Changed from Delivery based on API mapping
+      render: (row) => <span className="text-slate-500">{row.status}</span>
     },
     {
       header: "Items",
-      render: (row) => <span className="text-slate-700">{row.items} Items</span>
+      render: (row) => <span className="text-slate-700">{row.number_of_items} Items</span>
     },
     {
       header: "Total",
-      render: (row) => <span className="font-semibold text-slate-800">${row.total}</span>
+      render: (row) => <span className="font-semibold text-slate-800">${row.total_amount}</span>
     },
     {
       header: "Payment",
       render: (row) => {
-        const isSuccess = row.paymentStatus === "Success";
+        const isSuccess = row.payment_status === "Success" || row.payment_status === "Paid"; // Adjusted for potential API values
+        const isPending = row.payment_status === "Pending";
+
+        // Define styles
+        let bgClass = "bg-gray-50 text-gray-700 border-gray-200";
+        let dotClass = "bg-gray-500";
+
+        if (isSuccess) {
+          bgClass = "bg-green-50 text-green-700 border-green-200";
+          dotClass = "bg-green-500";
+        } else if (isPending) {
+          bgClass = "bg-yellow-50 text-yellow-700 border-yellow-200";
+          dotClass = "bg-yellow-500";
+        }
+
         return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${isSuccess
-              ? "bg-green-50 text-green-700 border-green-200"
-              : "bg-yellow-50 text-yellow-700 border-yellow-200"
-            }`}>
-            <span className={`w-1.5 h-1.5 rounded-full mr-1 ${isSuccess ? 'bg-green-500' : 'bg-yellow-500'}`}></span>
-            {row.paymentStatus}
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${bgClass}`}>
+            <span className={`w-1.5 h-1.5 rounded-full mr-1 ${dotClass}`}></span>
+            {row.payment_status}
           </span>
         )
       }
@@ -172,12 +158,18 @@ useEffect(() => {
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
         <DataTable
           columns={columns}
-          data={MOCK_ORDERS}
-          loading={false}
-          pagination={{ from: 1, to: MOCK_ORDERS.length, total: MOCK_ORDERS.length, current_page: 1, last_page: 1 }}
-          onPageChange={() => { }}
-          onSearch={() => { }}
-          searchTerm=""
+          data={orders}
+          loading={isLoading}
+          pagination={{
+            from: (pagination.current_page - 1) * pagination.per_page + 1,
+            to: Math.min(pagination.current_page * pagination.per_page, pagination.total),
+            total: pagination.total,
+            current_page: pagination.current_page,
+            last_page: pagination.last_page
+          }}
+          onPageChange={(p) => setPage(p)}
+          onSearch={(s) => { setSearch(s); setPage(1); }}
+          searchTerm={search}
           searchPlaceholder="Search orders..."
         />
       </div>
@@ -225,3 +217,4 @@ useEffect(() => {
     </div>
   );
 }
+
