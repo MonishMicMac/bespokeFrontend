@@ -17,3 +17,22 @@
   animation: fadeIn 0.2s ease-out;
 }
 
+
+/* Global reusable Tailwind components */
+
+.btn {
+  @apply px-4 py-2 text-sm font-medium rounded-md transition-all active:scale-95;
+}
+
+.btn-success {
+  @apply bg-green-600 text-white hover:bg-green-700;
+}
+
+.btn-error {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
+.btn-outline {
+  @apply border border-slate-300 text-slate-700 hover:bg-slate-100;
+}
+

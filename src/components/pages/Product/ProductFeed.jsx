@@ -14,7 +14,8 @@ export default function ProductFeed() {
   // Filter State
   const [activeFilters, setActiveFilters] = useState({
     category_id: [],
-    vendor_id: []
+    vendor_id: [],
+    subcategory_id: []
   });
 
   const fetchProducts = async () => {
@@ -22,7 +23,8 @@ export default function ProductFeed() {
     try {
       // Construct Query Params
       let query = `?page=${page}&per_page=20`;
-      if (activeFilters.category_id.length > 0) query += `&category_id=${activeFilters.category_id[0]}`; // For simplicity sending one, update backend for array if needed
+      if (activeFilters.category_id.length > 0) query += `&category_id=${activeFilters.category_id[0]}`;
+        if (activeFilters.subcategory_id.length > 0) query += `&sub_category_id=${activeFilters.subcategory_id[0]}`; // For simplicity sending one, update backend for array if needed
       if (activeFilters.vendor_id.length > 0) query += `&vendor_id=${activeFilters.vendor_id[0]}`;
 
       const res = await api.get(`/show/products${query}`);

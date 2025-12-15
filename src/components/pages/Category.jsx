@@ -1,12 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { toast } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion"; 
-import { 
-  Upload, Trash2, Edit3, Plus, X, 
-  AlertTriangle, CheckCircle, ImageIcon, Loader2 
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Upload, Trash2, Edit3, Plus, X,
+  AlertTriangle, CheckCircle, ImageIcon, Loader2
 } from "lucide-react";
-import api from "../../api/axios";
-import DataTable from "../../components/ui/DataTable"; // Importing the reusable table
+import DataTable from "../../components/ui/DataTable";
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory
+} from "../../hooks/useCategories";
 
 const VITE_IMGURL = import.meta.env.VITE_IMGURL;
 
@@ -15,30 +20,26 @@ const CATEGORY_TYPES = [
   { value: "2", label: "Women Wear" },
   { value: "3", label: "Kids Wear" },
   { value: "4", label: "Unisex Wear" },
+  { value: "5", label: "Others" },
 ];
 
 export default function Category() {
   // --- Data State ---
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);     // Form loading
-  const [tableLoading, setTableLoading] = useState(false); // Table loading
-  
+  // Managed by React Query now
+
   // --- Pagination & Search State ---
-  const [pagination, setPagination] = useState({
-    current_page: 1,
-    last_page: 1,
-    total: 0,
-    per_page: 10,
-    from: 0,
-    to: 0
+  const [queryParams, setQueryParams] = useState({
+    page: 1,
+    search: ""
   });
+
   const [searchTerm, setSearchTerm] = useState("");
 
   // --- Form State ---
   const [categoryType, setCategoryType] = useState("");
   const [categoryName, setCategoryName] = useState("");
   const [editingId, setEditingId] = useState(null);
-  
+
   // --- Image State ---
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
@@ -50,37 +51,21 @@ export default function Category() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
 
-  // --- Fetch Data ---
-  const fetchCategories = async (page = 1, search = "") => {
-    setTableLoading(true);
-    try {
-      const res = await api.get(`/categories?page=${page}&search=${search}&per_page=10`);
-      if (res.data.status) {
-        setCategories(res.data.data.data); 
-        setPagination({
-          current_page: res.data.data.current_page,
-          last_page: res.data.data.last_page,
-          total: res.data.data.total,
-          per_page: res.data.data.per_page,
-          from: res.data.data.from,
-          to: res.data.data.to
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to load categories");
-    } finally {
-      setTableLoading(false);
-    }
-  };
+  // --- React Query Hooks ---
+  const { data: categoryData, isLoading: tableLoading } = useCategories(queryParams);
+  const createMutation = useCreateCategory();
+  const updateMutation = useUpdateCategory();
+  const deleteMutation = useDeleteCategory();
 
-  // Debounce Search
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchCategories(1, searchTerm);
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm]);
+  const categories = categoryData?.data?.data || [];
+  const pagination = {
+    current_page: categoryData?.data?.current_page || 1,
+    last_page: categoryData?.data?.last_page || 1,
+    total: categoryData?.data?.total || 0,
+    per_page: categoryData?.data?.per_page || 10,
+    from: categoryData?.data?.from || 0,
+    to: categoryData?.data?.to || 0
+  };
 
   // --- Form Handlers ---
   const resetForm = () => {
@@ -128,43 +113,36 @@ export default function Category() {
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
     setErrors({});
 
-    try {
-      const formData = new FormData();
-      formData.append("category_type", categoryType);
-      formData.append("category_name", categoryName);
-      if (imageFile) formData.append("img_path", imageFile);
+    const formData = new FormData();
+    formData.append("category_type", categoryType);
+    formData.append("category_name", categoryName);
+    if (imageFile) formData.append("img_path", imageFile);
 
-      let res;
-      if (editingId) {
-        res = await api.post(`/categories/${editingId}`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } else {
-        res = await api.post("/categories", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      }
-
-      if (res.data.status) {
-        toast.success(editingId ? "Category updated successfully" : "Category created successfully");
-        resetForm();
-        fetchCategories(pagination.current_page, searchTerm);
-      } else {
-        toast.error(res.data.message || "Operation failed");
-      }
-    } catch (err) {
-      if (err.response?.status === 422) {
-        setErrors(err.response.data.errors);
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+    if (editingId) {
+      updateMutation.mutate({ id: editingId, formData }, {
+        onSuccess: (data) => {
+          if (data.status) resetForm();
+          else if (data.errors) setErrors(data.errors);
+        },
+        onError: (err) => {
+          if (err.response?.status === 422) setErrors(err.response.data.errors);
+        }
+      });
+    } else {
+      createMutation.mutate(formData, {
+        onSuccess: (data) => {
+          if (data.status) resetForm();
+          else if (data.errors) setErrors(data.errors);
+        },
+        onError: (err) => {
+          if (err.response?.status === 422) setErrors(err.response.data.errors);
+        }
+      });
     }
-    setLoading(false);
   };
 
   const handleEditClick = (cat) => {
@@ -183,27 +161,21 @@ export default function Category() {
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (!categoryToDelete) return;
-    try {
-      const res = await api.delete(`/categories/${categoryToDelete}`);
-      if (res.data.status) {
-        toast.success("Category deleted successfully");
-        fetchCategories(pagination.current_page, searchTerm);
-      } else {
-        toast.error("Could not delete category");
+    deleteMutation.mutate(categoryToDelete, {
+      onSettled: () => {
+        setDeleteModalOpen(false);
+        setCategoryToDelete(null);
       }
-    } catch {
-      toast.error("Failed to delete");
-    } finally {
-      setDeleteModalOpen(false);
-      setCategoryToDelete(null);
-    }
+    });
   };
 
   const getTypeLabel = (value) => {
     return CATEGORY_TYPES.find((t) => t.value === String(value))?.label || "Unknown";
   };
+
+  const isFormLoading = createMutation.isPending || updateMutation.isPending;
 
   // --- Table Columns Configuration ---
   const columns = [
@@ -212,7 +184,7 @@ export default function Category() {
       className: "w-16",
       render: (row, index) => (
         <span className="text-slate-400 text-xs">
-           {(pagination.from || 1) + index}
+          {(pagination.from || 1) + index}
         </span>
       )
     },
@@ -220,10 +192,10 @@ export default function Category() {
       header: "Image",
       render: (row) => (
         row.img_path ? (
-          <img 
-            src={VITE_IMGURL + row.img_path} 
+          <img
+            src={VITE_IMGURL + row.img_path}
             alt={row.category_name}
-            className="w-10 h-12 object-cover rounded border border-slate-200 shadow-sm" 
+            className="w-10 h-12 object-cover rounded border border-slate-200 shadow-sm"
           />
         ) : (
           <div className="w-10 h-12 bg-slate-100 rounded border flex items-center justify-center text-slate-400">
@@ -242,7 +214,7 @@ export default function Category() {
       header: "Type",
       render: (row) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-           {getTypeLabel(row.category_type || row.type)}
+          {getTypeLabel(row.category_type || row.type)}
         </span>
       )
     },
@@ -252,14 +224,14 @@ export default function Category() {
       tdClassName: "text-right",
       render: (row) => (
         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button 
-            onClick={() => handleEditClick(row)} 
+          <button
+            onClick={() => handleEditClick(row)}
             className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
           >
             <Edit3 size={16} />
           </button>
-          <button 
-            onClick={() => initiateDelete(row.id)} 
+          <button
+            onClick={() => initiateDelete(row.id)}
             className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded transition-all"
           >
             <Trash2 size={16} />
@@ -271,10 +243,10 @@ export default function Category() {
 
   return (
     <div className="min-h-screen bg-slate-50 p-6 font-sans text-slate-800">
-      
+
       {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -10 }} 
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="mb-6"
@@ -284,18 +256,18 @@ export default function Category() {
       </motion.div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        
+
         {/* LEFT COLUMN: Form */}
-        <motion.div 
-           initial={{ opacity: 0, x: -20 }}
-           animate={{ opacity: 1, x: 0 }}
-           transition={{ duration: 0.5 }}
-           className="xl:col-span-1 h-fit"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="xl:col-span-1 h-fit"
         >
           <div className="bg-white rounded-lg border border-slate-200 shadow-sm sticky top-6">
             <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 rounded-t-lg flex justify-between items-center">
               <h2 className="font-semibold text-slate-800 flex items-center gap-2">
-                {editingId ? <Edit3 size={18} className="text-blue-600"/> : <Plus size={18} className="text-blue-600"/>}
+                {editingId ? <Edit3 size={18} className="text-blue-600" /> : <Plus size={18} className="text-blue-600" />}
                 {editingId ? "Edit Category" : "New Category"}
               </h2>
               {editingId && (
@@ -342,7 +314,7 @@ export default function Category() {
                 <label className="block text-sm font-medium text-slate-700">
                   Cover Image <span className="text-xs text-slate-400 font-normal">(720x851px)</span>
                 </label>
-                <motion.div 
+                <motion.div
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   className={`relative group border-2 border-dashed rounded-lg p-4 text-center transition-colors duration-300 ${imageError ? 'border-red-300 bg-red-50' : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50'}`}
@@ -370,17 +342,17 @@ export default function Category() {
                     </div>
                   )}
                 </motion.div>
-                {imageError && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle size={12}/> {imageError}</p>}
+                {imageError && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertTriangle size={12} /> {imageError}</p>}
               </div>
 
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isFormLoading}
                   className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-md shadow-sm transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading ? <Loader2 className="animate-spin" size={18}/> : (editingId ? <CheckCircle size={18} /> : <Plus size={18} />)}
-                  {loading ? "Processing..." : (editingId ? "Update Category" : "Create Category")}
+                  {isFormLoading ? <Loader2 className="animate-spin" size={18} /> : (editingId ? <CheckCircle size={18} /> : <Plus size={18} />)}
+                  {isFormLoading ? "Processing..." : (editingId ? "Update Category" : "Create Category")}
                 </button>
               </div>
             </form>
@@ -388,20 +360,23 @@ export default function Category() {
         </motion.div>
 
         {/* RIGHT COLUMN: Reusable Data Table */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="xl:col-span-2"
         >
-          <DataTable 
+          <DataTable
             columns={columns}
             data={categories}
             loading={tableLoading}
             pagination={pagination}
             searchTerm={searchTerm}
-            onSearch={setSearchTerm}
-            onPageChange={(newPage) => fetchCategories(newPage, searchTerm)}
+            onSearch={(term) => {
+              setSearchTerm(term);
+              setQueryParams(prev => ({ ...prev, page: 1, search: term }));
+            }}
+            onPageChange={(newPage) => setQueryParams(prev => ({ ...prev, page: newPage }))}
             searchPlaceholder="Search categories..."
           />
         </motion.div>
@@ -410,41 +385,41 @@ export default function Category() {
       {/* --- DELETE CONFIRMATION MODAL --- */}
       <AnimatePresence>
         {deleteModalOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
           >
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.3, type: "spring", bounce: 0.3 }}
               className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100"
             >
-              
+
               {/* Modal Header */}
               <div className="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                   <div className="p-1.5 bg-red-100 rounded-full text-red-600">
-                     <AlertTriangle size={18} />
+                    <AlertTriangle size={18} />
                   </div>
                   Confirm Deletion
                 </h3>
-                <button 
+                <button
                   onClick={() => setDeleteModalOpen(false)}
                   className="text-slate-400 hover:text-slate-600 transition-colors"
                 >
                   <X size={20} />
                 </button>
               </div>
-              
+
               {/* Modal Body */}
               <div className="px-6 py-6">
                 <p className="text-slate-600 leading-relaxed">
-                  Are you sure you want to permanently delete this category? <br/>
+                  Are you sure you want to permanently delete this category? <br />
                   <span className="text-xs text-slate-400">This action cannot be undone.</span>
                 </p>
               </div>

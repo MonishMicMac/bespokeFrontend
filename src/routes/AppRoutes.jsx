@@ -23,6 +23,10 @@ const ProductFeed = lazy(() => import("../components/pages/Product/ProductFeed")
 const ProductDetails = lazy(() => import("../components/pages/Product/ProductDetails"));
 
 import ProtectedRoute from "./ProtectedRoute";
+import VendorList from "../components/pages/vendor/VendorList";
+import Order from "../components/pages/order/Order";
+const VendorDetail = lazy(() => import("../components/pages/vendor/VendorDetail"));
+const CustomerList = lazy(() => import("../components/pages/customer/CustomerList"));
 
 /* Loading fallback */
 function Loader() {
@@ -72,8 +76,10 @@ export default function AppRoutes() {
           <Route path="product/:id" element={<ProductDetails />} />
 
           {/* Settings */}
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="VendorList" element={<VendorList />} />
+          <Route path="vendor/details/:id" element={<VendorDetail />} />
+          <Route path="CustomerList" element={<CustomerList />} />
+          <Route path="orderlist" element={<Order />} />
         </Route>
 
         {/* Fallback */}

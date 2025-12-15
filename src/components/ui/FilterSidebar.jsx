@@ -3,6 +3,8 @@ import { Filter, X } from "lucide-react";
 import api from "../../api/axios"; 
 
 export default function FilterSidebar({ onFilterChange }) {
+
+
   // --- Data State ---
   const [masterData, setMasterData] = useState({
     categories: [],
@@ -35,8 +37,11 @@ export default function FilterSidebar({ onFilterChange }) {
 
   // --- 2. Handle Checkbox Changes ---
   const handleCheck = (type, id) => {
+
+    
     const newFilters = { ...selectedFilters };
     
+ 
     // Toggle logic
     if (newFilters[type].includes(id)) {
       newFilters[type] = newFilters[type].filter(item => item !== id);
@@ -54,6 +59,7 @@ export default function FilterSidebar({ onFilterChange }) {
   // --- 3. Clear All ---
   const clearFilters = () => {
     const reset = { category_id: [], subcategory_id: [], vendor_id: [] };
+ 
     setSelectedFilters(reset);
     onFilterChange(reset);
   };

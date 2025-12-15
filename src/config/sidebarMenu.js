@@ -66,12 +66,16 @@ export const sidebarMenu = [
     icon: FileText,
     children: [
       {
-        title: "Daily Report",
-        path: "/reports/daily",
+        title: "Vendor List",
+        path: "/VendorList",
       },
       {
-        title: "Monthly Report",
-        path: "/reports/monthly",
+        title: "Customer List",
+        path: "/CustomerList",
+      },
+      {
+        title: "Order List",
+        path: "/orderlist",
       },
     ],
   },
