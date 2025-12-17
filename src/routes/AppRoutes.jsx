@@ -25,6 +25,7 @@ const ProductDetails = lazy(() => import("../components/pages/Product/ProductDet
 import ProtectedRoute from "./ProtectedRoute";
 import VendorList from "../components/pages/vendor/VendorList";
 import Order from "../components/pages/order/Order";
+import OrderDetail from "../components/pages/order/OrderDetails";
 const VendorDetail = lazy(() => import("../components/pages/vendor/VendorDetail"));
 const CustomerList = lazy(() => import("../components/pages/customer/CustomerList"));
 
@@ -80,6 +81,8 @@ export default function AppRoutes() {
           <Route path="vendor/details/:id" element={<VendorDetail />} />
           <Route path="CustomerList" element={<CustomerList />} />
           <Route path="orderlist" element={<Order />} />
+
+          <Route path="orderDetails/:id" element={<OrderDetail />} />
         </Route>
 
         {/* Fallback */}
