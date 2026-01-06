@@ -38,14 +38,21 @@ export default function SubCategory() {
   const updateMutation = useUpdateSubCategory();
   const deleteMutation = useDeleteSubCategory();
 
-  const subCategories = subCatData?.data?.data || [];
-  const pagination = {
-    current_page: subCatData?.data?.current_page || 1,
-    last_page: subCatData?.data?.last_page || 1,
-    total: subCatData?.data?.total || 0,
-    per_page: subCatData?.data?.per_page || 10,
-    from: subCatData?.data?.from || 0,
-    to: subCatData?.data?.to || 0
+  const subCategories = subCatData?.data || [];
+  const pagination = subCatData?.pagination ? {
+    current_page: subCatData.pagination.current_page || 1,
+    last_page: subCatData.pagination.last_page || 1,
+    total: subCatData.pagination.total || 0,
+    per_page: subCatData.pagination.per_page || 10,
+    from: ((subCatData.pagination.current_page - 1) * subCatData.pagination.per_page) + 1,
+    to: Math.min(subCatData.pagination.current_page * subCatData.pagination.per_page, subCatData.pagination.total)
+  } : {
+    current_page: 1,
+    last_page: 1,
+    total: subCategories.length,
+    per_page: 10,
+    from: 1,
+    to: subCategories.length
   };
 
   const allCategories = metaData?.categories || [];
@@ -70,6 +77,8 @@ export default function SubCategory() {
   const [imagePreview, setImagePreview] = useState("");
   const [imageError, setImageError] = useState("");
   const fileRef = useRef(null);
+
+  // --- UI State ---
 
   // --- UI State ---
   const [errors, setErrors] = useState({});

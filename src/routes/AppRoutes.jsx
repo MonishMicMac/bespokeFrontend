@@ -18,6 +18,12 @@ const Designer = lazy(() => import("../components/pages/Designer"));
 
 const CurrentDeals = lazy(() => import("../components/pages/CurrentDeals"));
 const SuperSaveDeals = lazy(() => import("../components/pages/SuperSaveDeals"));
+const SizeMaster = lazy(() => import("../components/pages/SizeMaster"));
+const MeasurementMaster = lazy(() => import("../components/pages/MeasurementMaster"));
+const RoomMaster = lazy(() => import("../components/pages/RoomMaster"));
+const WearTypeMaster = lazy(() => import("../components/pages/WearTypeMaster"));
+const MeasurementMapping = lazy(() => import("../components/pages/MeasurementMapping"));
+const MaterialMaster = lazy(() => import("../components/pages/MaterialMaster"));
 
 const ProductFeed = lazy(() => import("../components/pages/Product/ProductFeed"));
 const ProductDetails = lazy(() => import("../components/pages/Product/ProductDetails"));
@@ -66,11 +72,17 @@ export default function AppRoutes() {
           {/* MASTER PAGES */}
           <Route path="add/category" element={<Category />} />
           <Route path="add/subcategory" element={<SubCategory />} />
+          <Route path="add/sizemaster" element={<SizeMaster />} />
+          <Route path="add/measurement" element={<MeasurementMaster />} />
           <Route path="add/appbanner" element={<AppBanner />} />
           <Route path="add/spotlight" element={<Spotlight />} />
           <Route path="add/designer" element={<Designer />} />
           <Route path="add/currentdeals" element={<CurrentDeals />} />
           <Route path="add/superdeals" element={<SuperSaveDeals />} />
+          <Route path="add/room" element={<RoomMaster />} />
+          <Route path="add/weartype" element={<WearTypeMaster />} />
+          <Route path="add/measurement-mapping" element={<MeasurementMapping />} />
+          <Route path="add/material" element={<MaterialMaster />} />
 
           {/* PRODUCTS */}
           <Route path="products" element={<ProductFeed />} />

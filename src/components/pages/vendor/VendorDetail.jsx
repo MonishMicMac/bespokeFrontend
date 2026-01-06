@@ -31,7 +31,7 @@ const VendorDetail = () => {
     const vendor = data?.data;
 
     // --- Helper Functions ---
-    
+
     // Handle Image URL (Full URL vs Relative Path)
     const getImageUrl = (path) => {
         if (!path) return null;
@@ -90,12 +90,12 @@ const VendorDetail = () => {
 
     return (
         <div className="min-h-screen bg-slate-50/50 font-sans text-slate-800 pb-12 pt-8">
-            
+
             {/* Header / Breadcrumb Area */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 flex items-center gap-2 text-sm text-slate-500">
-                 <button onClick={() => navigate(-1)} className="hover:text-slate-800 transition-colors">Home</button>
-                 <span>&gt;</span>
-                 <span className="font-semibold text-slate-900">Vendor Details</span>
+                <button onClick={() => navigate(-1)} className="hover:text-slate-800 transition-colors">Home</button>
+                <span>&gt;</span>
+                <span className="font-semibold text-slate-900">Vendor Details</span>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -103,8 +103,8 @@ const VendorDetail = () => {
 
                     {/* --- LEFT PANEL (Profile Card) --- */}
                     <div className="lg:col-span-4 bg-white rounded-3xl p-8 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] text-center relative h-fit sticky top-6">
-                        
-                      
+
+
 
                         {/* Profile Image */}
                         <div className="relative mx-auto mb-4 w-32 h-32">
@@ -132,7 +132,7 @@ const VendorDetail = () => {
                         {/* Name & Title */}
                         <h1 className="text-2xl font-bold text-slate-900 mb-1">{vendor.shop_name}</h1>
                         <p className="text-sm font-medium text-slate-500 mb-1">@{vendor.username}</p>
-                        
+
                         <div className="flex items-center justify-center gap-1.5 text-amber-500 font-medium text-sm mb-4">
                             <span>👑</span> Top Vendor
                         </div>
@@ -142,7 +142,7 @@ const VendorDetail = () => {
                             <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-pink-50 text-pink-600">
                                 Trusted Vendor
                             </span>
-                             <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-600">
+                            <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-600">
                                 {getVendorTypeLabel(vendor.vendor_type)}
                             </span>
                             {vendor.is_customization === "1" && (
@@ -154,8 +154,8 @@ const VendorDetail = () => {
 
                         {/* Description */}
                         <p className="text-slate-500 text-sm leading-relaxed mb-6 px-2 line-clamp-4">
-                            {vendor.description || 
-                            `${vendor.shop_name} is a dedicated ${getVendorTypeLabel(vendor.vendor_type)} focused on delivering quality products and services. Member since ${new Date(vendor.created_at).getFullYear()}.`}
+                            {vendor.description ||
+                                `${vendor.shop_name} is a dedicated ${getVendorTypeLabel(vendor.vendor_type)} focused on delivering quality products and services. Member since ${new Date(vendor.created_at).getFullYear()}.`}
                             <span className="font-semibold text-slate-900 cursor-pointer ml-1 hover:underline">Read More</span>
                         </p>
 
@@ -169,30 +169,37 @@ const VendorDetail = () => {
                                 <div className="text-slate-400 group-hover:text-slate-800 transition-colors"><MessageCircle size={20} /></div>
                                 <span className="text-xs font-semibold text-slate-600 underline decoration-slate-300 underline-offset-2 group-hover:text-slate-900">Chat</span>
                             </button>
-                            
+
                         </div>
 
                         {/* Main CTA */}
-                        <button className="w-full py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-orange-400 text-white font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm">
-                            Contact Vendor
-                        </button>
+                        <div className="flex flex-col gap-3 w-full">
+                            <button className="w-full py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-orange-400 text-white font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 text-sm">
+                                Contact Vendor
+                            </button>
+                            <button
+                                onClick={() => navigate(`/products?vendor_id=${vendor.id}`)}
+                                className="w-full py-3.5 rounded-full bg-white text-slate-700 font-bold border border-slate-200 shadow-sm hover:shadow-md hover:border-purple-200 hover:text-purple-600 transition-all transform hover:-translate-y-0.5 text-sm flex items-center justify-center gap-2"
+                            >
+                                <Store size={18} /> Show Products
+                            </button>
+                        </div>
                     </div>
 
 
                     {/* --- RIGHT PANEL (Tabs & Content) --- */}
                     <div className="lg:col-span-8">
-                        
+
                         {/* Tabs (Underline Style) */}
                         <div className="flex border-b border-slate-200 mb-8 overflow-x-auto gap-8 sticky top-0 bg-slate-50/95 backdrop-blur z-10 ">
-                            {['Overview',  'Gallery', 'Reviews'].map((tab) => (
+                            {['Overview', 'Gallery', 'Reviews'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab.toLowerCase())}
-                                    className={`pb-4 text-base font-semibold transition-all whitespace-nowrap border-b-2 ${
-                                        activeTab === tab.toLowerCase() 
-                                        ? "border-purple-600 text-purple-700" 
-                                        : "border-transparent text-slate-400 hover:text-slate-600"
-                                    }`}
+                                    className={`pb-4 text-base font-semibold transition-all whitespace-nowrap border-b-2 ${activeTab === tab.toLowerCase()
+                                            ? "border-purple-600 text-purple-700"
+                                            : "border-transparent text-slate-400 hover:text-slate-600"
+                                        }`}
                                 >
                                     {tab}
                                 </button>
@@ -201,11 +208,11 @@ const VendorDetail = () => {
 
                         {/* Content Area */}
                         <div className="space-y-12">
-                            
+
                             {/* --- Overview Section --- */}
                             {activeTab === 'overview' && (
                                 <div className="space-y-8 animate-in fade-in duration-500">
-                                    
+
                                     {/* Stats Cards */}
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
@@ -244,7 +251,7 @@ const VendorDetail = () => {
                                             <Briefcase size={20} className="text-slate-400" />
                                             Business Information
                                         </h3>
-                                        
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                                             <div className="flex items-center gap-4">
                                                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
@@ -302,19 +309,19 @@ const VendorDetail = () => {
                                         <h3 className="text-xl font-bold text-slate-900">Media Gallery</h3>
                                         <button className="text-xs font-medium text-slate-400 hover:text-purple-600 underline decoration-slate-300 underline-offset-2">See More Gallery</button>
                                     </div>
-                                    
+
                                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                                         {/* Main Large Image Placeholder */}
                                         <div className="w-full h-64 bg-slate-100 rounded-xl mb-4 overflow-hidden flex items-center justify-center text-slate-300 relative group">
                                             {vendor.img_path ? (
-                                                 <img src={getImageUrl(vendor.img_path)} className="w-full h-full object-cover" alt="Gallery Main" />
+                                                <img src={getImageUrl(vendor.img_path)} className="w-full h-full object-cover" alt="Gallery Main" />
                                             ) : (
                                                 <ImageIcon size={64} />
                                             )}
                                         </div>
                                         {/* Thumbnails */}
                                         <div className="grid grid-cols-4 gap-4">
-                                            {[1,2,3,4].map(i => (
+                                            {[1, 2, 3, 4].map(i => (
                                                 <div key={i} className="aspect-square bg-slate-50 rounded-lg flex items-center justify-center text-slate-300 hover:bg-slate-100 cursor-pointer transition-colors">
                                                     <ImageIcon size={24} />
                                                 </div>
@@ -324,8 +331,8 @@ const VendorDetail = () => {
                                 </div>
                             )}
 
-                             {/* --- Reviews Section --- */}
-                             {(activeTab === 'overview' || activeTab === 'reviews') && (
+                            {/* --- Reviews Section --- */}
+                            {(activeTab === 'overview' || activeTab === 'reviews') && (
                                 <div>
                                     <div className="flex justify-between items-end mb-4">
                                         <h3 className="text-xl font-bold text-slate-900">Reviews</h3>
@@ -339,11 +346,11 @@ const VendorDetail = () => {
                                             </div>
                                             {/* Stars */}
                                             <div className="flex gap-1 text-amber-400 mb-2">
-                                                 <Star size={24} fill="currentColor" />
-                                                 <Star size={24} fill="currentColor" />
-                                                 <Star size={24} fill="currentColor" />
-                                                 <Star size={24} fill="currentColor" />
-                                                 <Star size={24} fill="currentColor" />
+                                                <Star size={24} fill="currentColor" />
+                                                <Star size={24} fill="currentColor" />
+                                                <Star size={24} fill="currentColor" />
+                                                <Star size={24} fill="currentColor" />
+                                                <Star size={24} fill="currentColor" />
                                             </div>
                                             <p className="font-bold text-slate-900 text-sm mb-1">Rating & Review</p>
                                             <p className="text-slate-500 text-xs max-w-xs mx-auto">
@@ -359,8 +366,8 @@ const VendorDetail = () => {
                                                 <div key={star} className="flex items-center gap-4">
                                                     <span className="w-3 text-xs font-bold text-slate-700">{star}</span>
                                                     <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                                                        <div 
-                                                            className="h-full bg-slate-800 rounded-full" 
+                                                        <div
+                                                            className="h-full bg-slate-800 rounded-full"
                                                             style={{ width: star === 5 ? '85%' : star === 4 ? '15%' : '0%' }}
                                                         ></div>
                                                     </div>
@@ -369,11 +376,11 @@ const VendorDetail = () => {
                                         </div>
                                     </div>
                                 </div>
-                             )}
+                            )}
 
-                          
 
-                        
+
+
 
                         </div>
                     </div>

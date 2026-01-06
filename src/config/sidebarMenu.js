@@ -18,6 +18,14 @@ export const sidebarMenu = [
       {
         title: "SubCategory",
         path: "/add/subcategory",
+      },
+      {
+        title: "Size Master",
+        path: "/add/sizemaster",
+      },
+      {
+        title: "Measurement Master",
+        path: "/add/measurement",
       }, {
         title: "Spotlight",
         path: "/add/spotlight",
@@ -26,23 +34,40 @@ export const sidebarMenu = [
         title: "AppBanner",
         path: "/add/appbanner",
       },
-     
- {
+
+      {
         title: "Designer",
         path: "add/designer",
       },
-       {
+      {
+        title: "Room Master",
+        path: "/add/room",
+      },
+      {
+        title: "Wear Type Master",
+        path: "/add/weartype",
+      },
+      {
+        title: "Measurement Mapping",
+        path: "/add/measurement-mapping",
+      },
+      {
+        title: "Material Master",
+        path: "/add/material",
+      },
+
+      {
         title: "CurrentDeals",
         path: "add/currentdeals",
       },
-       {
-        title: "Super Deals",
+      {
+        title: "Supers Deals",
         path: "add/superdeals",
       },
-      
-      
 
-      
+
+
+
     ],
   },
 

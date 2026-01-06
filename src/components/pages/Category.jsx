@@ -57,14 +57,14 @@ export default function Category() {
   const updateMutation = useUpdateCategory();
   const deleteMutation = useDeleteCategory();
 
-  const categories = categoryData?.data?.data || [];
+  const categories = categoryData?.data || [];
   const pagination = {
-    current_page: categoryData?.data?.current_page || 1,
-    last_page: categoryData?.data?.last_page || 1,
-    total: categoryData?.data?.total || 0,
-    per_page: categoryData?.data?.per_page || 10,
-    from: categoryData?.data?.from || 0,
-    to: categoryData?.data?.to || 0
+    current_page: categoryData?.pagination?.current_page || 1,
+    last_page: categoryData?.pagination?.last_page || 1,
+    total: categoryData?.pagination?.total || 0,
+    per_page: categoryData?.pagination?.per_page || 10,
+    from: ((categoryData?.pagination?.current_page - 1) * categoryData?.pagination?.per_page) + 1 || 0,
+    to: Math.min(categoryData?.pagination?.current_page * categoryData?.pagination?.per_page, categoryData?.pagination?.total) || 0
   };
 
   // --- Form Handlers ---
@@ -147,8 +147,8 @@ export default function Category() {
 
   const handleEditClick = (cat) => {
     setEditingId(cat.id);
-    setCategoryType(String(cat.category_type || cat.type || ""));
-    setCategoryName(cat.category_name || cat.name);
+    setCategoryType(String(cat.type || ""));
+    setCategoryName(cat.name || "");
     if (cat.img_path) {
       setImagePreview(VITE_IMGURL + cat.img_path);
     }
@@ -207,14 +207,14 @@ export default function Category() {
     {
       header: "Name",
       render: (row) => (
-        <span className="font-medium text-slate-800">{row.category_name || row.name}</span>
+        <span className="font-medium text-slate-800 uppercase">{row.name}</span>
       )
     },
     {
       header: "Type",
       render: (row) => (
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-          {getTypeLabel(row.category_type || row.type)}
+          {getTypeLabel(row.type)}
         </span>
       )
     },
