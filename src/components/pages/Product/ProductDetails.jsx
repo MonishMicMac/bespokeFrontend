@@ -59,6 +59,7 @@ const ProductDetails = () => {
     }
   };
 
+
   useEffect(() => {
     if (id) {
       fetchDetails();
@@ -108,7 +109,21 @@ const ProductDetails = () => {
                 <span className="material-symbols-outlined">arrow_back</span>
               </Link>
               <div className="min-w-0">
-                <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate">{product.product_name}</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter truncate">{product.product_name}</h1>
+                  <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm transition-all duration-300 ${(product.is_active === "1" || product.product_is_active === "1")
+                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                    : 'bg-slate-50 text-slate-500 border border-slate-100'
+                    }`}>
+                    {(product.is_active === "1" || product.product_is_active === "1") && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                      </span>
+                    )}
+                    {(product.is_active === "1" || product.product_is_active === "1") ? 'Active' : 'Inactive'}
+                  </div>
+                </div>
                 <div className="flex flex-wrap items-center gap-2 mt-1 text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">
                   <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded text-slate-600 dark:text-slate-300">ID: {product.id}</span>
                   <span>•</span>
@@ -176,7 +191,21 @@ const ProductDetails = () => {
                     <span className="material-symbols-outlined text-3xl">info</span>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Fabric Information</h2>
+                    <div className="flex items-center gap-4">
+                      <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Fabric Information</h2>
+                      <div className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-sm transition-all duration-300 ${(material?.material_is_active === "1" || material?.is_active === "1")
+                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                        : 'bg-slate-50 text-slate-500 border border-slate-100'
+                        }`}>
+                        {(material?.material_is_active === "1" || material?.is_active === "1") && (
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                          </span>
+                        )}
+                        {(material?.material_is_active === "1" || material?.is_active === "1") ? 'Active' : 'Inactive'}
+                      </div>
+                    </div>
                     <p className="text-sm font-medium text-slate-500">{material?.material_name || material?.name}</p>
                   </div>
                 </div>

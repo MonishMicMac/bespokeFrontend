@@ -148,6 +148,21 @@ export default function ProductFeed() {
                       {product.rating} <Star size={10} fill="black" />
                     </div>
                   )}
+
+                  {/* Status Badge */}
+                  <div className={`absolute top-2 left-2 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 shadow-lg backdrop-blur-md transition-all duration-300 ${(product.is_active === "1" || product.product_is_active === "1")
+                      ? 'bg-emerald-500/90 text-white ring-1 ring-emerald-400/50'
+                      : 'bg-slate-500/90 text-white ring-1 ring-slate-400/50'
+                    }`}>
+                    {(product.is_active === "1" || product.product_is_active === "1") && (
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                      </span>
+                    )}
+                    {(product.is_active === "1" || product.product_is_active === "1") ? 'Active' : 'Inactive'}
+                  </div>
+
                   {/* Wishlist Icon (Hidden by default, show on hover) */}
                   <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
                     <Heart size={16} className={product.wishlist ? "fill-red-500 text-red-500" : "text-gray-700"} />

@@ -100,7 +100,7 @@ export default function MeasurementMaster() {
         setErrors({});
 
         // Validate that all active sizes have a value (as per backend rule)
-        const providedSizes = Object.keys(sizeValues).filter(k => sizeValues[k]?.trim() !== "");
+        const providedSizes = Object.keys(sizeValues).filter(k => sizeValues[k]?.toString()?.trim());
         const activeSizeNames = activeSizes.map(s => s.name);
         const missingSizes = activeSizeNames.filter(name => !providedSizes.includes(name));
 
@@ -490,9 +490,9 @@ export default function MeasurementMaster() {
                                 <div>
                                     <h4 className="text-2xl font-bold text-slate-900">{measurementToView.name}</h4>
                                     <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold uppercase ${measurementToView.type === 2 ? "bg-pink-100 text-pink-700" :
-                                            measurementToView.type === 1 ? "bg-blue-100 text-blue-700" :
-                                                measurementToView.type === 3 ? "bg-orange-100 text-orange-700" :
-                                                    "bg-purple-100 text-purple-700"
+                                        measurementToView.type === 1 ? "bg-blue-100 text-blue-700" :
+                                            measurementToView.type === 3 ? "bg-orange-100 text-orange-700" :
+                                                "bg-purple-100 text-purple-700"
                                         }`}>
                                         {measurementToView.type_name || "N/A"}
                                     </span>
